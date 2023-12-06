@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es-co">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockola</title>
+    <style>
+        /* Estilos para los recuadros */
+        .box {
+            border: 1px solid black;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            display: inline-block;
+            width: 33.33%; /* Ancho fijo para todas las cajas */
+            height: 100%; /* Altura para todas las cajas */
+            flex-grow: 1; /* Hacer que las cajas se ajusten al ancho del contenedor */
+        }
+
+        /* Estilos para los botones */
+        .button {
+          margin: 5px;
+          padding: 10px 20px;
+          font-size: 16px;
+          box-sizing: border-box;
+        }
+
+        .box button {
+            background-color: #42a5f5;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Estilos para las filas */
+        .row {
+            display: flex;
+        }
+
+        /* Alinear una sola columna en la fila superior */
+        .row:first-child .box {
+            display: inline-block; /* Coloca las cajas en línea */
+        }
+
+        .box-container {
+            width: 100%;
+            max-width: 1500px; /* ajusta el valor al ancho deseado */
+            margin: auto; /* centra la caja horizontalmente */
+            overflow-x: scroll; /* Agrega una barra de desplazamiento horizontal */
+            scroll-behavior: smooth; /* Añade un efecto de desplazamiento suave */
+            white-space: nowrap; /* Evita que las cajas se salten de línea */
+        }
+
+        .box.first-row {
+            border: 1px solid black;
+            padding: 2px;
+            margin: 10px;
+            text-align: center;
+            display: inline-block;
+            width: 31.5%; /* Ancho fijo para todas las cajas */
+            height: 100%; /* Altura para todas las cajas */
+            flex-shrink: 0; /* Evita que las cajas se encimen */
+            scroll-snap-align: start; /* Utiliza scroll snap para desplazamiento uniforme */
+        }
+
+        .box.box.first-row img {
+            width: 100%; /* Ancho fijo para todas las cajas */
+            height: 100%; /* Altura para todas las cajas */
+        }
+
+        /* Ajustar tamaño de las columnas en la segunda fila */
+        .row:nth-child(2) .box {
+            height: 5px; /* Altura fija para los recuadros */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+         /* Ajustar tamaño de las columnas en la tercera fila */
+        .row:nth-child(3) .box {
+          height: 255px; /* Altura fija para los recuadros */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background-color: gray
+        }
+
+        /* Establecer tamaño para las columnas en la fila inferior */
+        .row:last-child .box {
+          height: 100px; /* Altura fija para los recuadros */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background-color: grey
+        }
+
+        .content {
+          position: relative;
+        }
+
+        .content img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .punto-negro {
+          position: absolute;
+          left: 0;
+          width: 15px;
+          height: 15px;
+          background-color: black;
+        }
+
+        .punto-azul {
+          position: absolute;
+          right: 0;
+          width: 15px;
+          height: 15px;
+          background-color: rgb(48, 16, 232);
+        }
+
+    </style>
+
+    <script>
+   
+        var interpreteSeleccionado; // Variable para almacenar el intérprete seleccionado
+        var interpretes = []; // Variable para almacenar los intérpretes cargados
+        var m = 0;
+
+        // ... Resto del código JavaScript ...
+
+  // Función para mostrar los intérpretes en el recuadro "Intérpretes"
+  async function mostrarInterpretes(datosInterpretes) {
+
+  try { 
+    // Generación dinámica del código HTML
+    let interpretesHTML = "<div>";
+    for (let i = 0; i < datosInterpretes.length; i++) {
+    let interprete = datosInterpretes[i];
+    interpretesHTML += `<div class='sub-caja' data-interprete="${interprete.nombre}">${interprete.nombre}</div>`;
+    }
+
+    interpretesHTML += "</div>";
+
+    document.getElementById("interpretesBox").innerHTML = interpretesHTML;
+
+    
+
+    const interpretesBox = document.querySelector('#interpretesBox');
+const flechaArriba = document.querySelector('.flecha_arriba');
+const flechaAbajo = document.querySelector('.flecha_abajo');
+let primerElemento = interpretesBox.querySelector('.sub-caja:first-child');
+let puntoNegro;
+
+cargarCanciones(primerElemento.getAttribute('data-interprete')); // Llamar a cargarCanciones con el intérprete seleccionado
+
+function crearPuntoNegro() {
+  puntoNegro = document.createElement('div');
+  puntoNegro.classList.add('punto-negro');
+  primerElemento.parentNode.insertBefore(puntoNegro, primerElemento);
+}
+
+function moverPunto(posicion) {
+  puntoNegro.style.top = `${posicion}px`;
+}
+
+function ajustarScroll() {
+  const scrollTop = interpretesBox.scrollTop;
+  const alturaContenedor = interpretesBox.offsetHeight;
+  const alturaPrimerElemento = primerElemento.offsetHeight;
+  const posicionPuntoNegro = puntoNegro.offsetTop;
+
+  if (posicionPuntoNegro < scrollTop || posicionPuntoNegro > scrollTop + alturaContenedor) {
+    interpretesBox.scrollTop = posicionPuntoNegro - alturaPrimerElemento;
+  }
+}
+
+primerElemento = interpretesBox.querySelector('.sub-caja:first-child');
+  if (!puntoNegro) {
+    crearPuntoNegro();
+  }
+  moverPunto(primerElemento.offsetTop);
+
+interpretesBox.addEventListener('scroll', () => { ajustarScroll(); });
+
+
+flechaArriba.addEventListener('click', () => {
+      const elementoAnterior = primerElemento.previousElementSibling;
+      if (elementoAnterior) {
+        primerElemento.classList.remove('first');
+        primerElemento = elementoAnterior;
+        ajustarScroll();
+        moverPunto(primerElemento.offsetTop);
+        primerElemento.classList.add('first');
+        console.log('valor del interprete', primerElemento.getAttribute('data-interprete'));
+        cargarCanciones(primerElemento.getAttribute('data-interprete')); // Llamar a cargarCanciones con el intérprete seleccionado
+      }
+    });
+  
+    flechaAbajo.addEventListener('click', () => {
+      const elementoSiguiente = primerElemento.nextElementSibling;
+      if (elementoSiguiente) {
+        primerElemento.classList.remove('first');
+        primerElemento = elementoSiguiente;
+        ajustarScroll();
+        moverPunto(primerElemento.offsetTop);
+        primerElemento.classList.add('first');
+        console.log('valor del interprete', primerElemento.getAttribute('data-interprete'));
+        cargarCanciones(primerElemento.getAttribute('data-interprete')); // Llamar a cargarCanciones con el intérprete seleccionado
+    }
+    });
+
+
+    // Agregar un listener para que escuche el click en cada intérprete
+      const divsInterpretes = document.querySelectorAll('.sub-caja');
+      for (let i = 0; i < divsInterpretes.length; i++) {
+      const interprete = divsInterpretes[i];
+      interprete.addEventListener('click', () => cargarCanciones(interprete.getAttribute('data-interprete')));
+    }
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+
+// Función para cargar los intérpretes correspondientes al género seleccionado
+async function cargarInterpretes(genero) {
+  try {
+    const response = await fetch(`cargar_interpretes.php?genero=${genero}`);
+    if (response.status === 200) {
+      const datosInterpretes = await response.json();
+      interpreteSeleccionado = ""; // Reiniciar el intérprete seleccionado
+      mostrarInterpretes(datosInterpretes);
+    } else {
+      console.log(`Error: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+
+let s = 0;
+let n = 0;
+
+// Función para cargar las canciones correspondientes al intérprete seleccionado
+async function cargarCanciones(interprete) {
+  try {
+    const response = await fetch(`cargar_titulos.php?interprete=${interprete}`);
+    if (response.status === 200) {
+      const datosCanciones = await response.json();
+
+      // Generación dinámica del código HTML
+      let cancionesHTML = "<div>";
+
+      for (let i = 0; i < datosCanciones.length; i++) {
+        let cancion = datosCanciones[i];
+        cancionesHTML += `<div class='sub-caja' data-titulo="${cancion.titulo}">${cancion.titulo}</div>`;
+      }
+
+      cancionesHTML += "</div>";
+
+      document.getElementById("titulosBox").innerHTML = cancionesHTML;
+
+
+
+
+
+
+
+const titulosBox = document.querySelector('#titulosBox');
+const flechaUp = document.querySelector('.flecha_up');
+const flechaDown = document.querySelector('.flecha_down');
+let firstElemento = titulosBox.querySelector('.sub-caja:first-child');
+let puntoAzul;
+
+// s = 1;
+// cargarListas(firstElemento.getAttribute('data-titulo'), s); // Llamar a cargarListas con el titulo seleccionado
+// n = n+1;
+
+function crearPuntoAzul() {
+  puntoAzul = document.createElement('div');
+  puntoAzul.classList.add('punto-azul');
+  firstElemento.parentNode.insertBefore(puntoAzul, firstElemento);
+ }
+
+function movingPunto(posicion) {
+  puntoAzul.style.top = `${posicion}px`;
+}
+
+function ajustingScroll() {
+  const scrollTop2 = titulosBox.scrollTop;
+  const alturaContenedor2 = titulosBox.offsetHeight;
+  const alturaPrimerElemento2 = firstElemento.offsetHeight;
+  const posicionPuntoAzul = puntoAzul.offsetTop;
+
+  if (posicionPuntoAzul < scrollTop2 || posicionPuntoAzul > scrollTop2 + alturaContenedor2) {
+    titulosBox.scrollTop = posicionPuntoAzul- alturaPrimerElemento2;
+  }
+}
+
+firstElemento = titulosBox.querySelector('.sub-caja:first-child');
+  if (!puntoAzul) {
+    crearPuntoAzul();
+  }
+  movingPunto(firstElemento.offsetTop);
+
+titulosBox.addEventListener('scroll', () => { ajustingScroll(); });
+
+flechaUp.addEventListener('click', () => {
+      const elementoAnterior2 = firstElemento.previousElementSibling;
+      if (elementoAnterior2) {
+        firstElemento.classList.remove('first');
+        firstElemento = elementoAnterior2;
+        ajustingScroll();
+        movingPunto(firstElemento.offsetTop);
+        firstElemento.classList.add('first');
+        console.log('valor del titulo', firstElemento.getAttribute('data-titulo'));
+        s = 1;
+        cargarListas(firstElemento.getAttribute('data-titulo'), s); // Llamar a cargarListas con el titulo seleccionado
+        n = n+1;
+      }
+    });
+
+
+    flechaDown.addEventListener('click', () => {
+      const elementoSiguiente2 = firstElemento.nextElementSibling;
+      if (elementoSiguiente2) {
+        firstElemento.classList.remove('first');
+        firstElemento = elementoSiguiente2;
+        ajustingScroll();
+        movingPunto(firstElemento.offsetTop);
+        firstElemento.classList.add('first');
+        console.log('valor del titulo', firstElemento.getAttribute('data-titulo'));
+        s = 1;
+        cargarListas(firstElemento.getAttribute('data-titulo'), s); // Llamar a cargarListas con el titulo seleccionado
+        n = n+1;
+      }
+    });
+
+
+
+
+
+
+
+
+      // Agregar un listener para que escuche el click en cada titulo
+      const titulos = document.querySelectorAll('.sub-caja');
+      for (let i = 0; i < titulos.length; i++) {
+         const titulo = titulos[i];
+         console.log(titulo);
+         s = 1;
+         console.log('valor de s' , s);
+         titulo.addEventListener('click', () => cargarListas(titulo.getAttribute('data-titulo'), s));
+         console.log('valor de s' , s);
+         m = m+1;  
+         console.log('contador click titulos', m);
+      }
+
+    } else {
+      console.log(`Error: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+
+let r = 0;
+async function cargarListas(titulo, ident) {
+  try {
+    const response = await fetch(`cargar_listas.php?titulo=${titulo}`);
+    console.log('Respuesta del servidor:', response); // Debug
+
+    if (response.status === 200) {
+      const datosListas = await response.json();
+
+      // Generación dinámica del código HTML
+      let listasHTML = "<div>";
+
+      for (let i = 0; i < datosListas.length; i++) {
+        let lista = datosListas[i];
+        if (lista.interprete) {
+          const interprete = lista.interprete;
+          const titulo = lista.titulo;
+          const interpreteTitulo = `${interprete} - ${titulo}`;
+          listasHTML += `<div class='sub-caja' data-interprete="${interprete}" data-titulo="${titulo}">${interpreteTitulo}</div>`;
+        } else {
+          console.log(`List not rendered due to missing interpreter: ${lista.titulo}`);
+        }
+      }
+
+      listasHTML += "</div>";
+
+      // Eliminar la lista anterior antes de agregar la nueva lista
+         const container = document.querySelector('#listaBox');
+      // container.innerHTML = '';
+
+      // Agregar los datos al container
+
+         console.log ('identificador' , ident);
+         const newDiv = document.createElement('div');
+         newDiv.setAttribute('data-titulo', titulo);
+         newDiv.innerHTML = listasHTML;
+         if (ident != 2) {
+         console.log('Esta corriendo este condicional aunque ident es 2 y no deberia =' , ident);
+         
+         container.appendChild(newDiv);
+         console.log('Nueva información agregada al listabox:', newDiv); // Debug
+         }
+    
+// Agregar listeners después de agregar el HTML al DOM
+// newDiv.querySelectorAll('.sub-caja').forEach((subCaja) => {
+  // subCaja.addEventListener('click', () => {
+    // cargarRutas(subCaja);
+ //  });
+// });
+
+// Agregar un listener a los elementos de la lista de canciones para que carguen las rutas correspondientes
+// Seleccionamos todos los elementos de la lista de canciones
+const listaCanciones = newDiv.querySelectorAll('.sub-caja');
+    // Comprobar si la lista de reproducción ya tiene elementos antes de cargar una nueva canción.
+    if (container.childNodes.length === 1) {
+      // cargarRutas(cancion);
+    }
+
+
+// Cargar automáticamente la primera canción de la lista si hay elementos en la lista
+// const listaCanciones2 = listaContainer.querySelectorAll('.sub-caja:not(#listaBox .sub-caja)');
+const listaCanciones2 = newDiv.querySelectorAll('.sub-caja');
+// if (listaCanciones2.length > 0 && listaCanciones2.length < 2) {
+
+if (m >= 3 && m < 6) {
+  console.log('longitud:', listaCanciones2.length);
+  cargarRutas(listaCanciones2[0]);
+  console.log('valor:', listaCanciones2[0]);
+}
+
+
+    } else {
+      console.log(`Error: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+
+let loadingAutoagregada = false;
+let selectedTrack = null;
+let autoagregada = null;
+let h = 0;
+
+function cargarRutas(subCaja) {
+  try {
+    const interprete = subCaja.getAttribute('data-interprete');
+    const titulo = subCaja.getAttribute('data-titulo');
+    const interpreteTitulo = `${interprete} - ${titulo}`;
+    const ruta = `cargar_rutas.php?interprete=${interprete}`;
+
+    const audioElement = document.createElement('audio');
+    const sourceElement = document.createElement('source');
+    const id = `cancion-${Math.random().toString(36).substr(2, 9)}`; // Generar un ID único
+
+    sourceElement.src = ruta;
+    sourceElement.type = 'audio/mpeg';
+    sourceElement.setAttribute('data-id', id);
+
+    audioElement.appendChild(sourceElement);
+    audioElement.play();
+
+    // Obtener la canción anteriormente seleccionada y eliminarla
+    const previousTrack = selectedTrack;
+    if (previousTrack) {
+      previousTrack.remove();
+    }
+
+    // Si no hay canciones en la lista, se coloca una autoagregada
+    if (!autoagregada) {
+      
+      console.log ('valor de h', h);
+      // if (h != 2) {
+      autoagregada = document.createElement('div');
+      autoagregada.classList.add('sub-caja');
+      autoagregada.innerHTML = interpreteTitulo;
+      console.log('Cancion autoagregada:', autoagregada)
+    // }
+   }
+
+   const container2 = document.querySelector('#listaBox');
+
+   // Si hay una canción autoagregada, se elimina después de que termine la canción
+   if (autoagregada) {
+      console.log('Cancion autoagregada:', autoagregada);
+      audioElement.addEventListener('ended', () => {
+        console.log('La canción ha terminado');
+        autoagregada.remove();
+        autoagregada = null;
+        currentIndex = null;
+        const firstTrack = container2.querySelector(':first-child');
+        if (firstTrack) {
+           container2.removeChild(firstTrack);
+           m = 3;
+           console.log('contador click titulos', m);
+           console.log('contenedor del listabox:', container2);
+           h = 2
+           cargarListas(container2.firstElementChild.attributes[0].nodeValue, h);
+        }
+      }); 
+      console.log('Evento "ended" agregado correctamente');
+    }
+
+    // Agregar la nueva canción
+    const container = document.querySelector('#listaBox');
+    const newTrack = document.createElement('div');
+    if (h != 2) {
+      // newTrack.classList.add('sub-caja');
+      // console.log('Cancion del track:', newTrack);
+    }
+   
+   
+
+
+    // Si hay una canción autoagregada, se agrega debajo de la autoagregada
+    if (autoagregada) {
+      // newTrack.innerHTML = interpreteTitulo;
+      // console.log('Cancion Nueva:', newTrack)
+      // container.insertBefore(newTrack, autoagregada.nextSibling);
+    } else {
+     // console.log('Cancion autoagregada:', autoagregada);
+     // newTrack.innerHTML = interpreteTitulo;
+     // container.appendChild(newTrack);
+     // console.log('Cancion del track:', newTrack);
+    }
+
+    // Almacenar la nueva canción seleccionada
+    selectedTrack = newTrack;
+
+    // Actualizar índice
+    currentIndex = 0;
+
+ 
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
+
+const boxes = document.querySelectorAll('.first-row');
+let isDown = false;
+let startX;
+let scrollLeft;
+
+boxes.forEach(box => {
+  box.addEventListener('mousedown', (e) => {
+    isDown = true;
+    startX = e.pageX - box.offsetLeft;
+    scrollLeft = box.scrollLeft;
+    box.style.cursor = 'grabbing'; /* Cambia el cursor del ratón al arrastrar */
+  });
+  
+  box.addEventListener('mouseleave', () => {
+    isDown = false;
+    box.style.cursor = 'grab'; /* Cambia el cursor del ratón al soltar */
+  });
+  
+  box.addEventListener('mouseup', () => {
+    isDown = false;
+    box.style.cursor = 'grab'; /* Cambia el cursor del ratón al soltar */
+  });
+  
+  box.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - box.offsetLeft;
+    const walk = (x - startX) * 2; /* El 2 puede ajustarse para mayor o menor sensibilidad del mouse */
+    box.scrollLeft = scrollLeft - walk;
+  });
+});
+
+function moverBarra(pixels) {
+  var container = document.querySelector('.box-container');
+  container.scrollLeft += pixels;
+}
+
+// Agregar evento "click" a la caja
+// document.getElementById('technoBox').addEventListener('click', function() {
+  // cargarInterpretes('Techno');
+// });
+
+// Llamar a la función al cargarse la página
+window.addEventListener('load', function() {
+  cargarInterpretes('Techno');
+});
+
+    </script>
+
+</head>
+
+<body>
+  <div class="box-container">
+    <div class="row">
+        <div id="technoBox" class="box first-row"><img src="Imagenes/Techno-Logo.jpg" alt="Techno"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Reggaeton')"><img src="Imagenes/Reggaeton-Logo.png" alt="Reggaeton"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Salsa')"><img src="Imagenes/Salsa-Logo.jpg" alt="Salsa"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Merengue')"><img src="Imagenes/Merengue-Logo.jpg" alt="Merengue"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Trap')"><img src="Imagenes/Trap-Logo.png" alt="Trap"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Llaneras')"><img src="Imagenes/Llaneras-Logo.jpg" alt="Llaneras"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Rock')"><img src="Imagenes/Rock-Logo.png" alt="Rock"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Reggae')"><img src="Imagenes/Reggae-Logo.jpg" alt="Reggae"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Calipso-Soca')"><img src="Imagenes/Soca-Logo.png" alt="Calipso-Soca"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Baladas')"><img src="Imagenes/Baladas-Logo.jpg" alt="Baladas"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Boleros')"><img src="Imagenes/Boleros-Logo.jpg" alt="Boleros"><span></span></div>
+        <div class="box first-row" onclick="cargarInterpretes('Bachata')"><img src="Imagenes/Bachata-Logo.png" alt="Bachata"><span></span></div>
+    </div>
+  </div>
+
+    <div class="row">
+        <div class="box">Lista de Intérpretes</div>
+        <div class="box">Lista de Reproducción</div>
+        <div class="box">Títulos de Canciones</div>
+    </div>
+
+    <div class="row">
+      <div class="box" id="interpretesBox"></div>
+      <div class="box" id="listaBox"></div>
+      <div class="box" id="titulosBox"></div>
+    </div>
+
+    <div class="row">
+        <div class="box">
+            <button class="button flecha_arriba">&#8593; Seleccione Interprete</button>
+            <button class="button flecha_abajo">&#8595; Seleccione Interprete</button>
+        </div>
+        
+        <div class="box">
+          <button class="button left-button" onclick="moverBarra(-200)">&#8592; Seleccione Genero</button>
+          <button class="button right-button" onclick="moverBarra(200)">&#8594; Seleccione Genero</button>
+        </div>
+           
+        <div class="box">
+            <button class="button flecha_up">&#8593; Seleccione Cancion</button>
+            <button class="button flecha_down">&#8595; Seleccione Cancion</button>
+        </div>
+    </div>
+
+</body>
+</html>
+
